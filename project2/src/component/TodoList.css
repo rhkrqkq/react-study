@@ -1,4 +1,4 @@
-.TodoList .searchBar {
+.TodoList .searchbar {
 	margin-bottom: 20px;
 	width: 100%;
 	border: none;
@@ -8,7 +8,7 @@
 	padding-bottom: 15px;
 }
 
-.TodoList .searchBar:focus {
+.TodoList .searchbar:focus {
 	outline: none;
 	border-bottom: 1px solid #1f93ff;
 }

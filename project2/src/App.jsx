@@ -1,8 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useReducer, useMemo } from "react";
 import Header from "./component/Header.jsx";
 import TodoEditor from "./component/TodoEditor.jsx";
 import TodoList from "./component/TodoList.jsx";
 import "./App.css";
+import TestComp from "./component/TestComp.jsx";
+import React from "react";
 
 const mockTodo = [
 	{
@@ -24,28 +26,80 @@ const mockTodo = [
 		createdDate: new Date().getTime(),
 	},
 ];
+function reducer(state, action) {
+	switch (action.type) {
+		case "CREATE": {
+			return [action.newItem, ...state];
+		}
+
+		case "UPDATE": {
+			return state.map((it) =>
+				it.id === action.targetId
+					? {
+							...it,
+							isDone: !it.isDone,
+						}
+					: it,
+			);
+		}
+
+		case "DELETE": {
+			return state.filter((it) => it.id !== action.targetId);
+		}
+		default:
+			return state;
+	}
+}
+
+export const TodoStateContext = React.createContext();
+export const TodoDispatchContext = React.createContext();
 
 function App() {
-	const [todo, setTodo] = useState(mockTodo);
+	const [todo, dispatch] = useReducer(reducer, mockTodo);
 	const idRef = useRef(3);
 
 	const onCreate = (content) => {
-		const newItem = {
-			id: idRef.current,
-			content: content,
-			isDone: false,
-			createdDate: new Date().getTime(),
-		};
-		setTodo([newItem, ...todo]);
+		dispatch({
+			type: "CREATE",
+			newItem: {
+				id: idRef.current,
+				content: content,
+				isDone: false,
+				createdDate: new Date().getTime(),
+			},
+		});
 		idRef.current += 1;
 	};
+
+	const onUpdate = useCallback((targetId) => {
+		dispatch({
+			type: "UPDATE",
+			targetId,
+		});
+	}, []);
+
+	const onDelete = useCallback((targetId) => {
+		dispatch({
+			type: "DELETE",
+			targetId,
+		});
+	}, []);
+
+	const memorizedDispatches = useMemo(() => {
+		return { onCreate, onUpdate, onDelete };
+	}, []);
 
 	return (
 		<>
 			<div className="App">
+				<TestComp />
 				<Header />
-				<TodoEditor onCreate={onCreate} />
-				<TodoList />
+				<TodoStateContext.Provider value={todo}>
+					<TodoDispatchContext.Provider value={memorizedDispatches}>
+						<TodoEditor />
+						<TodoList />
+					</TodoDispatchContext.Provider>
+				</TodoStateContext.Provider>
 			</div>
 		</>
 	);

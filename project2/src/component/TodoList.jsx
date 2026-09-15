@@ -1,15 +1,53 @@
 import TodoItem from "./TodoItem.jsx";
 import "./TodoList.css";
+import { useMemo, useState, useContext } from "react";
+import { TodoStateContext } from "../App";
 
 const TodoList = () => {
+	const storeData = useContext(TodoStateContext);
+	const todo = storeData;
+	const [search, setSearch] = useState("");
+	const onChangeSearch = (e) => {
+		setSearch(e.target.value);
+	};
+
+	const getSearchResult = () => {
+		return search === ""
+			? todo
+			: todo.filter((it) => it.content.includes(search));
+	};
+
+	const analyzeTodo = useMemo(() => {
+		const totalCount = todo.length;
+		const doneCount = todo.filter((it) => it.isDone).length;
+		const notDoneCount = totalCount - doneCount;
+		return {
+			totalCount,
+			doneCount,
+			notDoneCount,
+		};
+	}, [todo]);
+
+	const { totalCount, doneCount, notDoneCount } = analyzeTodo;
+
 	return (
 		<div className="TodoList">
 			<h4>Todo List 🌱</h4>
-			<input className="searchBar" placeholder="검색어를 입력하세요" />
+			<div>
+				<div>총개수: {totalCount}</div>
+				<div>완료된 할 일 : {doneCount}</div>
+				<div>아직 완료 못한 일 : {notDoneCount}</div>
+			</div>
+			<input
+				className="searchbar"
+				placeholder="검색어를 입력하세요"
+				value={search}
+				onChange={onChangeSearch}
+			/>
 			<div className="list_wrapper">
-				<TodoItem />
-				<TodoItem />
-				<TodoItem />
+				{getSearchResult().map((it) => (
+					<TodoItem key={it.id} {...it} />
+				))}
 			</div>
 		</div>
 	);
