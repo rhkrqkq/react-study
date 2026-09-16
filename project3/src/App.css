@@ -2,3 +2,8 @@
 	font-family: "GmarketSans";
 	src: url("/GmarketSansTTFMedium.ttf");
 }
+
+.App {
+	padding-left: 20px;
+	padding-right: 20px;
+}

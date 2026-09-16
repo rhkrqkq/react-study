@@ -1,20 +1,131 @@
-import { useState } from "react";
-import emotion1 from "./assets/emotion1.png";
 import "./App.css";
-import { getEmotionImgById } from "./util";
+import React, { useReducer, useRef, useEffect, useState } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import Home from "./pages/Home";
+import New from "./pages/New";
+import Diary from "./pages/Diary";
+import Edit from "./pages/Edit";
+
+const mockData = [
+	{
+		id: "mock1",
+		date: new Date().getTime() - 1,
+		content: "mock1",
+		emotionId: 1,
+	},
+	{
+		id: "mock2",
+		date: new Date().getTime() - 2,
+		content: "mock2",
+		emotionId: 2,
+	},
+	{
+		id: "mock3",
+		date: new Date().getTime() - 3,
+		content: "mock3",
+		emotionId: 3,
+	},
+];
+
+function reducer(state, action) {
+	switch (action.type) {
+		case "CREATE": {
+			return [action.data, ...state];
+		}
+		case "UPDATE": {
+			return state.map((it) =>
+				String(it.id) === String(action.data.id)
+					? { ...action.data }
+					: it,
+			);
+		}
+		case "DELETE": {
+			return state.filter(
+				(it) => String(it.id) !== String(action.targetId),
+			);
+		}
+		case "INIT": {
+			return action.data;
+		}
+		default: {
+			return state;
+		}
+	}
+}
+
+export const DiaryStateContext = React.createContext();
+export const DiaryDispatchContext = React.createContext();
 
 function App() {
-	return (
-		<>
-			<div className="App"></div>
-			<h1>어어 그래</h1>
-			<img alt="감정1" src={getEmotionImgById(1)} />
-			<img alt="감정2" src={getEmotionImgById(2)} />
-			<img alt="감정3" src={getEmotionImgById(3)} />
-			<img alt="감정4" src={getEmotionImgById(4)} />
-			<img alt="감정5" src={getEmotionImgById(5)} />
-		</>
-	);
+	const [isDataLoaded, setIsDataLoaded] = useState(false);
+	const [data, dispatch] = useReducer(reducer, []);
+	const idRef = useRef(0);
+
+	useEffect(() => {
+		dispatch({
+			type: "INIT",
+			data: mockData,
+		});
+		setIsDataLoaded(true);
+	}, []);
+
+	const onCreate = (date, content, emotionId) => {
+		dispatch({
+			type: "CREATE",
+			data: {
+				id: idRef.current,
+				date: new Date(date).getTime(),
+				content,
+				emotionId,
+			},
+		});
+		idRef.current += 1;
+	};
+
+	const onUpdate = (targetId, date, content, emotionId) => {
+		dispatch({
+			type: "UPDATE",
+			data: {
+				id: targetId,
+				date: new Date(date).getTime(),
+				content,
+				emotionId,
+			},
+		});
+	};
+
+	const onDelete = (targetId) => {
+		dispatch({
+			type: "DELETE",
+			targetId,
+		});
+	};
+	if (!isDataLoaded) {
+		return <div>데이터를 불러오는중입니다</div>;
+	} else {
+		return (
+			<DiaryStateContext.Provider value={data}>
+				<DiaryDispatchContext.Provider
+					value={{
+						onCreate,
+						onUpdate,
+						onDelete,
+					}}
+				>
+					<>
+						<div className="App">
+							<Routes>
+								<Route path="/" element={<Home />} />
+								<Route path="/edit/:id" element={<Edit />} />
+								<Route path="/diary/:id" element={<Diary />} />
+								<Route path="/new" element={<New />} />
+							</Routes>
+						</div>
+					</>
+				</DiaryDispatchContext.Provider>
+			</DiaryStateContext.Provider>
+		);
+	}
 }
 
 export default App;
