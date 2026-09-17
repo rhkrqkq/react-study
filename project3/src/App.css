@@ -3,7 +3,16 @@
 	src: url("/GmarketSansTTFMedium.ttf");
 }
 
+/* .App {
+	padding-left: 20px;
+	padding-right: 20px;
+} */
+
 .App {
+	max-width: 900px; /* 또는 width: 100%; max-width: 650px; */
+	width: 100%;
+	margin: 0 auto;
+	box-sizing: border-box;
 	padding-left: 20px;
 	padding-right: 20px;
 }

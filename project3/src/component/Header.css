@@ -10,18 +10,20 @@
 .Header > div {
 	display: flex;
 }
+
 .Header .header_title {
-	width: 50%;
+	flex-grow: 1;
 	font-size: 20px;
 	justify-content: center;
+	text-align: center;
 }
 
 .Header .header_left {
-	width: 25%;
-	justify-content: start;
+	flex-shrink: 0;
+	justify-content: flex-start;
 }
 
 .Header .header_right {
-	width: 25%;
-	justify-content: end;
+	justify-content: flex-end;
+	flex-shrink: 0;
 }
